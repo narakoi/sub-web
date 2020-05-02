@@ -5,7 +5,9 @@
         <el-card>
           <div slot="header">
             Subscription Converter
-            <svg-icon icon-class="github" style="margin-left: 20px" @click="goToProject" />
+            <svg-icon icon-class="github" style="margin-right: 20px" @click="goToProject" />
+            <el-button slot="append" @click="gotoHostpage" icon="el-icon-link">前往官网</el-button>
+            
 
             <div style="display: inline-block; position:absolute; right: 20px">{{ backendVersion }}</div>
           </div>
@@ -75,10 +77,10 @@
                 <el-form-item label-width="0px">
                   <el-row type="flex">
                     <el-col>
-                      <el-checkbox v-model="form.emoji" label="Emoji" border></el-checkbox>
                       <el-checkbox v-model="form.nodeList" label="输出为 Node List" border></el-checkbox>
+                      <el-checkbox v-model="form.emoji" label="Emoji" border></el-checkbox>
                     </el-col>
-                    <el-popover placement="bottom" v-model="form.extraset">
+                    <el-popover placement="left" v-model="form.extraset">
                       <el-row>
                         <el-checkbox v-model="form.udp" label="启用 UDP"></el-checkbox>
                       </el-row>
@@ -99,12 +101,9 @@
                       </el-row>
                       <el-button slot="reference">更多选项</el-button>
                     </el-popover>
-                    <el-popover placement="bottom" style="margin-left: 20px">
+                    <el-popover placement="left" style="margin-left: 20px">
                       <el-row>
                         <el-checkbox v-model="form.tpl.surge.doh" label="Surge.DoH"></el-checkbox>
-                      </el-row>
-                      <el-row>
-                        <el-checkbox v-model="form.tpl.clash.doh" label="Clash.DoH"></el-checkbox>
                       </el-row>
                       <el-button slot="reference">模板定制功能</el-button>
                     </el-popover>
@@ -155,17 +154,23 @@
                   :loading="loading"
                   :disabled="customSubUrl.length === 0"
                 >生成短链接</el-button>
-                <!-- <el-button style="width: 120px" type="primary" @click="surgeInstall" icon="el-icon-connection">一键导入Surge</el-button> -->
               </el-form-item>
 
               <el-form-item label-width="0px" style="text-align: center">
-                <el-button
+                <!-- <el-button
                   style="width: 120px"
                   type="primary"
                   @click="dialogUploadConfigVisible = true"
                   icon="el-icon-upload"
                   :loading="loading"
-                >上传配置</el-button>
+                >上传配置</el-button>-->
+                <el-button 
+                  style="width: 120px" 
+                  type="primary" 
+                  @click="surgeInstall" 
+                  icon="el-icon-connection"
+                  :disabled="customSubUrl.length === 0"
+                >一键导入Surge</el-button>
                 <el-button
                   style="width: 120px"
                   type="primary"
@@ -219,22 +224,20 @@
 
 <script>
 const project = "https://github.com/CareyWang/sub-web";
+const hostpage = "https://suda.cat";
 const remoteConfigSample =
   "https://raw.githubusercontent.com/tindy2013/subconverter/master/base/config/example_external_config.ini";
 const gayhubRelease = "https://github.com/tindy2013/subconverter/releases";
-const defaultBackend = "https://api.wcc.best/sub?";
+const defaultBackend = "https://api.suda.cat/sub?";
 const shortUrlBackend = "https://api.suo.yt/short";
-const configUploadBackend = "https://api.wcc.best/config/upload";
+const configUploadBackend = "https://api.pibonds.com/config/upload";
 const tgBotLink = "https://t.me/CareyWong_bot";
 
 export default {
   data() {
     return {
-      backendVersion: "",
-      advanced: "2",
-
-      // 是否为 PC 端
-      isPC: true,
+      backendVersion: '',
+      advanced: "1",
 
       options: {
         clientTypes: {
@@ -251,7 +254,23 @@ export default {
           ssr: "ssr",
           ssd: "ssd"
         },
-        backendOptions: [{ value: "http://127.0.0.1:25500/sub?" }],
+        backendOptions: [
+            { 
+              label: "LOCALAPI",
+              value: "http://127.0.0.1:25500/sub?"
+            },
+            { 
+              label: "PIBONDSAPI",
+              value: "https://api.pibonds.com/sub?"
+            },
+            { 
+              label: "SUDAAPI",
+              value: "https://api.suda.cat/sub?"
+            },
+            { 
+              label: "YTOOAPI",
+              value: "https://api.ytoo-163cdn.com/sub?"
+            }],
         remoteConfig: [
           {
             label: "universal",
@@ -259,12 +278,12 @@ export default {
               {
                 label: "No-Urltest",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/universal/no-urltest.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/universal/no-urltest.ini"
               },
               {
                 label: "Urltest",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/universal/urltest.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/universal/urltest.ini"
               }
             ]
           },
@@ -272,44 +291,48 @@ export default {
             label: "customized",
             options: [
               {
+                label: "SudaCloud",
+                value: "https://raw.githubusercontent.com/narakoi/sub-web/master/docs/customized/SudaCloud_Custom.ini"
+              },
+              {
                 label: "Maying",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/maying.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/maying.ini"
               },
               {
                 label: "rixCloud",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/rixcloud.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/rixcloud.ini"
               },
               {
                 label: "YoYu",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/yoyu.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/yoyu.ini"
               },
               {
                 label: "Ytoo",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/ytoo.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/ytoo.ini"
               },
               {
                 label: "NyanCAT",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/nyancat.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/nyancat.ini"
               },
               {
                 label: "Nexitally",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/nexitally.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/nexitally.ini"
               },
               {
                 label: "贼船",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/zeichuan.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/zeichuan.ini"
               },
               {
                 label: "布丁",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/customized/pud.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/customized/pud.ini"
               }
             ]
           },
@@ -319,12 +342,12 @@ export default {
               {
                 label: "NeteaseUnblock(仅规则，No-Urltest)",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/special/netease.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/special/netease.ini"
               },
               {
                 label: "Basic(仅GEOIP CN + Final)",
                 value:
-                  "https://subconverter.s3-ap-southeast-1.amazonaws.com/RemoteConfig/special/basic.ini"
+                  "https://raw.githubusercontent.com/CareyWang/Rules/master/RemoteConfig/special/basic.ini"
               }
             ]
           }
@@ -351,10 +374,7 @@ export default {
         // tpl 定制功能
         tpl: {
           surge: {
-            doh: false // dns 查询是否使用 DoH
-          },
-          clash: {
-            doh: false
+            doh: false, // dns 查询是否使用 DoH 
           }
         }
       },
@@ -372,7 +392,6 @@ export default {
   },
   created() {
     document.title = "Subscription Converter";
-    this.isPC = this.$getOS().isPc;
   },
   mounted() {
     this.form.clientType = "clash";
@@ -382,6 +401,9 @@ export default {
   methods: {
     onCopy() {
       this.$message.success("Copied!");
+    },
+    gotoHostpage() {
+      window.open(hostpage);
     },
     goToProject() {
       window.open(project);
@@ -399,14 +421,7 @@ export default {
       }
 
       const url = "clash://install-config?url=";
-      window.open(
-        url +
-          encodeURIComponent(
-            this.curtomShortSubUrl !== ""
-              ? this.curtomShortSubUrl
-              : this.customSubUrl
-          )
-      );
+      window.open(url + encodeURIComponent(this.curtomShortSubUrl !== '' ? this.curtomShortSubUrl : this.customSubUrl));
     },
     surgeInstall() {
       if (this.customSubUrl === "") {
@@ -477,10 +492,7 @@ export default {
           this.form.sort.toString();
 
         if (this.form.tpl.surge.doh === true) {
-          this.customSubUrl += "&surge.doh=true";
-        }
-        if (this.form.tpl.clash.doh === true) {
-          this.customSubUrl += "&clash.doh=true";
+          this.customSubUrl += "&surge.doh=true"
         }
       }
 
@@ -529,7 +541,7 @@ export default {
         message: h(
           "i",
           { style: "color: teal" },
-          "各种订阅链接（短链接服务除外）生成纯前端实现，无隐私问题。默认提供后端转换服务，隐私担忧者请自行搭建后端服务。"
+          "各种订阅链接（短链接服务除外）生成纯前端实现，无隐私问题。默认提SUDACLOUD后端转换服务，隐私担忧者请自行搭建本地后端服务。"
         )
       });
     },
@@ -591,15 +603,11 @@ export default {
       };
     },
     getBackendVersion() {
-      this.$axios
-        .get(
-          defaultBackend.substring(0, defaultBackend.length - 5) + "/version"
-        )
-        .then(res => {
-          this.backendVersion = res.data.replace(/backend\n$/gm, "");
-          this.backendVersion = this.backendVersion.replace("subconverter", "");
-        });
-    },
+      this.$axios.get(defaultBackend.substring(0, defaultBackend.length - 5) + '/version').then(res => {
+        this.backendVersion = res.data.replace(/backend\n$/gm, '');
+        this.backendVersion = this.backendVersion.replace('subconverter', '');
+      })
+    }
   }
 };
 </script>
